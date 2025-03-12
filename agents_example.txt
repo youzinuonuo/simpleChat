@@ -1,0 +1,117 @@
+AutoGen AgentChat 智能体模块总结
+核心智能体类型
+1. BaseChatAgent（基础聊天智能体）
+描述：所有聊天智能体的抽象基类
+主要特性：
+定义了智能体的基本接口和行为
+维护智能体状态
+提供消息处理方法
+关键方法：
+on_messages() - 处理传入消息并返回响应
+on_messages_stream() - 流式处理消息
+on_reset() - 重置智能体状态
+run() - 运行智能体处理任务
+run_stream() - 流式运行智能体
+2. AssistantAgent（助手智能体）
+描述：提供具有工具使用能力的助手智能体
+主要特性：
+支持工具调用和执行
+支持智能体间的转交（handoff）
+可配置的上下文大小限制
+支持流式输出
+可选的工具使用反思功能
+参数：
+name - 智能体名称
+model_client - 模型客户端
+tools - 可用工具列表
+handoffs - 转交配置
+model_context - 模型上下文
+system_message - 系统消息
+model_client_stream - 是否启用流式输出
+reflect_on_tool_use - 是否反思工具使用
+tool_call_summary_format - 工具调用结果格式化模板
+memory - 记忆存储
+3. UserProxyAgent（用户代理智能体）
+描述：代表人类用户的智能体
+主要特性：
+通过输入函数获取用户输入
+支持可取消的用户输入请求
+适用于人机交互场景
+参数：
+name - 智能体名称
+description - 智能体描述
+input_func - 用户输入函数
+4. CodeExecutorAgent（代码执行智能体）
+描述：提取并执行消息中的代码片段并返回输出
+主要特性：
+支持Python和Shell代码执行
+推荐使用Docker容器执行代码以确保安全
+通常与生成代码的智能体配合使用
+参数：
+name - 智能体名称
+code_executor - 代码执行器（推荐DockerCommandLineCodeExecutor）
+description - 智能体描述
+sources - 指定从哪些智能体接收代码
+5. SocietyOfMindAgent（心智社会智能体）
+描述：使用内部智能体团队生成响应的智能体
+主要特性：
+内部运行一个智能体团队
+使用模型客户端基于团队消息生成最终响应
+每次响应后重置内部团队
+参数：
+name - 智能体名称
+team - 内部智能体团队
+model_client - 模型客户端
+description - 智能体描述
+instruction - 生成响应的指令
+response_prompt - 响应提示
+智能体工作流程
+AssistantAgent工作流程
+接收消息
+使用模型客户端生成响应
+3. 如果响应包含工具调用：
+执行工具调用（可并行）
+根据reflect_on_tool_use设置决定是否进行反思
+返回工具调用结果或反思后的响应
+如果响应包含转交请求：
+生成HandoffMessage
+将上下文传递给目标智能体
+智能体状态管理
+智能体在调用之间维护状态
+调用on_messages()时只需传递新消息
+使用on_reset()重置智能体状态
+支持save_state()和load_state()进行状态保存和恢复
+高级功能
+1. 模型上下文管理
+可以使用BufferedChatCompletionContext限制发送给模型的消息数量
+适用于模型有token处理限制的情况
+2. 流式输出
+设置model_client_stream=True启用流式输出
+通过on_messages_stream()方法获取流式响应
+3. 记忆功能
+可以为智能体配置记忆存储
+记忆在模型推理前更新上下文
+4. 工具使用
+支持函数工具和结构化输出
+可配置工具调用结果的格式化方式
+支持并行工具调用
+5. 智能体间转交
+支持将对话转交给其他智能体
+可传递上下文和工具调用结果
+使用注意事项
+1. 智能体不是线程安全或协程安全的，不应在多个任务或协程之间共享
+2. 使用UserProxyAgent会使运行中的团队进入临时阻塞状态，应设置超时
+代码执行推荐使用Docker容器以确保安全
+o1系列模型不支持系统消息和函数调用
+使用reflect_on_tool_use=True可以获得更自然的工具使用响应
+实用示例
+文档中提供了多个实用示例，包括：
+基本智能体使用
+模型客户端令牌流式输出
+带工具的智能体
+结构化输出和工具使用
+有界模型上下文
+带记忆的智能体
+o1-mini模型使用
+使用推理模型的智能体
+这些示例可以作为开发自己的智能体应用的起点。
