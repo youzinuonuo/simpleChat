@@ -1,0 +1,59 @@
+Refer：
+https://microsoft.github.io/autogen/stable/user-guide/agentchat-user-guide/memory.html
+https://microsoft.github.io/autogen/stable/reference/python/autogen_core.memory.html
+
+AutoGen多Agent系统中的中央记忆管理架构
+架构特点
+中央记忆库：单一Agent负责记忆的存储和管理
+职责分离：明确的记忆管理和业务处理分工
+统一接口：标准化的记忆请求和响应机制
+灵活扩展：易于集成不同类型的记忆存储后端
+
+AutoGen提供了Memory协议作为记忆管理的基础，包含以下关键方法：
+add: 向记忆库添加新条目
+query: 根据查询检索相关信息
+update_context: 用检索到的信息更新模型上下文
+clear: 清除记忆库中的所有条目
+close: 清理记忆库使用的资源
+
+基础记忆实现：ListMemory
+ListMemory是AutoGen提供的最简单记忆实现，它按时间顺序存储记忆条目：
+from autogen_core.memory import ListMemory, MemoryContent, MemoryMimeType
+
+# 创建记忆实例
+memory = ListMemory()
+
+# 添加记忆内容
+await memory.add(MemoryContent(
+    content="用户偏好使用公制单位", 
+    mime_type=MemoryMimeType.TEXT
+))
+
+# 查询记忆
+results = await memory.query("单位偏好")
+
+高级记忆实现：向量数据库
+AutoGen支持使用向量数据库作为记忆存储后端，提供更强大的语义检索能力：
+from autogen_ext.memory.chromadb import ChromaDBVectorMemory, PersistentChromaDBVectorMemoryConfig
+
+# 初始化ChromaDB记忆
+vector_memory = ChromaDBVectorMemory(
+    config=PersistentChromaDBVectorMemoryConfig(
+        collection_name="user_preferences",
+        persistence_path="/path/to/storage",
+        k=3,  # 返回前k个结果
+        score_threshold=0.5,  # 最小相似度分数
+    )
+)
+
+# 添加带元数据的记忆
+await vector_memory.add(MemoryContent(
+    content="用户偏好素食菜谱", 
+    mime_type=MemoryMimeType.TEXT,
+    metadata={"category": "饮食", "importance": "高"}
+))
+向量数据库的主要优势：
+语义相似度搜索而非简单关键词匹配
+更精准的相关内容检索
+支持元数据过滤
+可持久化存储大量记忆

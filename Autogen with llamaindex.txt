@@ -1,0 +1,39 @@
+Refer：https://microsoft.github.io/autogen/stable/user-guide/core-user-guide/cookbook/llamaindex-agent.html
+
+LlamaIndex 侧重于知识管理与检索
+主要功能：构建检索增强生成(RAG)系统
+特色：
+多种数据源连接器
+高效的向量索引和检索
+文档处理与管理
+查询引擎优化
+工作流管理
+
+AutoGen 侧重于多代理协作框架
+主要功能：构建自主代理和多代理系统
+特色：
+多代理对话协作
+代理角色定义与通信
+人机协作模式
+工具使用和函数调用
+复杂推理链的管理
+
+集成可行性：
+从AutoGen官方文档中可以看出，AutoGen与LlamaIndex的集成主要通过创建一个特殊的LlamaIndexAgent类来实现，该类封装了LlamaIndex的RAG能力，并将其集成到AutoGen的代理框架中。以下是集成的核心方式：
+class LlamaIndexAgent(RoutedAgent):
+    def __init__(self, description: str, llama_index_agent: AgentRunner, memory: BaseMemory | None = None) -> None:
+        super().__init__(description)
+        self._llama_index_agent = llama_index_agent
+        self._memory = memory
+
+    @message_handler
+    async def handle_user_message(self, message: Message, ctx: MessageContext) -> Message:
+        # 处理用户消息并调用LlamaIndex代理
+        # ...
+
+这个类有几个关键部分：
+内部封装了LlamaIndex的AgentRunner实例
+可选地使用LlamaIndex的BaseMemory管理对话历史
+实现了@message_handler方法处理用户消息
+
+通过这种方式，AutoGen可以利用LlamaIndex的RAG功能，并将其集成到代理的对话流程中。

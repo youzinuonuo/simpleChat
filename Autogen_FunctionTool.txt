@@ -1,0 +1,33 @@
+Refer: 
+https://microsoft.github.io/autogen/stable/reference/python/autogen_core.tools.html#autogen_core.tools.FunctionTool
+https://microsoft.github.io/autogen/stable/user-guide/agentchat-user-guide/tutorial/agents.html#function-tool
+     
+FunctionTool是AutoGen框架中用于将普通Python函数包装成AI代理可调用工具的一个类。这个类让developer能够轻松地将现有的Python函数转变为AI代理可以使用的工具。
+该类允许将标准Python函数包装成Agent可以调用的工具, 支持同步和异步执行。
+
+工作原理
+FunctionTool利用Python的类型注解系统来了解函数的参数和返回值类型
+根据这些类型注解，它生成一个模式(schema)，用于：
+输入验证 - 确保传给函数的参数类型正确
+序列化 - 将AI代理生成的参数转换为函数可接受的格式
+通知LLM函数期望的参数 - 让LLM知道应该提供什么参数
+当LLM想要调用此函数时，它会基于生成的模式提供符合函数规范的参数
+
+可以应用于以下场景：
+让Agent能够访问特定领域的功能
+扩展Agent的能力，使其能够与外部系统交互
+将已有的Python函数库转变为Agent可调用的工具集
+
+class FunctionTool(
+    func: Callable[[...], Any], 
+    description: str, 
+    name: str | None = None, 
+    global_imports: Sequence[str | ImportFromModule | Alias] = [], 
+    strict: bool = False
+)[source]
+
+func: 要包装的Python函数
+description: 告诉模型此函数的用途、功能和应该在什么情况下调用它
+name: 工具的名称, 用于标识
+global_imports: 全局导入, 用于支持复杂的函数
+strict: 是否严格模式, 用于验证输入
