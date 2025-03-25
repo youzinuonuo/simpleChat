@@ -1,0 +1,38 @@
+基础消息类型：
+BaseMessage: 所有消息类型的基类
+source: 发送消息的agent名称
+models_usage: 模型使用情况（token统计）
+metadata: 额外的消息元数据
+主要消息类型分为两大类：
+A. ChatMessage（用于agent间通信）:
+TextMessage: 纯文本消息
+MultiModalMessage: 多模态消息
+StopMessage: 停止信号消息
+ToolCallSummaryMessage: 工具调用结果摘要
+HandoffMessage: 对话转交消息
+target: 目标agent
+content: 消息内容
+context: 上下文消息列表
+B. AgentEvent（用于agent和团队的内部事件）:
+ToolCallRequestEvent: 请求使用工具的事件
+ToolCallExecutionEvent: 工具执行结果事件
+MemoryQueryEvent: 内存查询事件
+UserInputRequestedEvent: 请求用户输入事件
+ModelClientStreamingChunkEvent: 模型流式输出事件
+ThoughtEvent: 思考过程事件
+特殊消息类型：
+HandoffMessage: 用于agent间转交对话
+包含目标agent、消息内容和上下文信息
+ToolCallSummaryMessage: 工具调用结果的总结
+包含工具调用的结果摘要
+事件消息特点：
+UserInputRequestedEvent: 包含请求ID
+ToolCallRequestEvent: 包含工具调用列表
+ToolCallExecutionEvent: 包含执行结果列表
+这个消息系统设计支持：
+Agent之间的通信
+工具的调用和结果处理
+用户交互
+内存操作
+流式输出
+对话转交

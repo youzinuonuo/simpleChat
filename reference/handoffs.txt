@@ -1,0 +1,58 @@
+handoffs是在AssistantAgent中的一个重要参数，它使智能体能够将对话转交给其他智能体。以下是关于handoffs的详细分析：
+基本配置
+handoffs参数的定义如下：
+handoffs: List[Handoff | str] | None = None
+这意味着你可以通过两种方式配置handoffs：
+字符串列表 - 直接提供目标智能体的名称
+Handoff对象列表 - 提供更复杂的转交配置
+使用场景
+handoffs主要用于以下场景：
+当一个智能体需要将任务交给更专业的智能体处理
+实现智能体之间的协作和分工
+构建具有专业化分工的智能体团队
+工作原理
+当配置了handoffs后，智能体会具备以下行为：
+转交触发：
+当智能体决定需要转交对话时，会返回一个HandoffMessage
+这个消息会包含在响应的chat_message字段中
+工具调用的处理：
+如果转交前有工具调用，这些调用会被执行
+工具调用的结果会通过context字段传递给目标智能体
+上下文传递：
+当前对话的上下文会通过HandoffMessage的context字段传递给目标智能体
+多重转交的处理：
+如果检测到多个转交请求，只有第一个会被执行
+可以通过禁用模型客户端中的并行工具调用来避免这种情况
+实际配置示例
+# 简单配置 - 仅使用智能体名称
+planning_agent = AssistantAgent(
+    name="PlanningAgent",
+    model_client=model_client,
+    system_message="你是一个智能路由器...",
+    handoffs=["BaseKnowledgeAgent", "ClientDataAgent"]  # 指定可能的转交目标
+)
+
+# 配合Swarm团队使用
+# 注意：转交功能只有在团队使用Swarm模式时才会执行
+router_team = Swarm(
+    participants=[planning_agent, base_knowledge_agent, client_data_agent],
+    max_turns=3
+)
+注意事项
+文档中强调了几个关于handoffs的重要注意事项：
+团队要求：
+转交功能只有在团队使用Swarm模式时才会自动执行
+在其他情况下，会生成HandoffMessage但不会自动转交
+并行工具调用：
+如果检测到多个转交请求，只有第一个会被执行
+建议通过设置parallel_tool_calls=False来避免这种情况
+上下文传递：
+工具调用和结果会通过context传递给目标智能体
+这确保了目标智能体有足够的上下文来理解任务
+实现细节
+从文档中可以看出，HandoffMessage包含以下关键字段：
+source: 发送转交的智能体名称
+target: 目标智能体名称
+content: 转交的原因或附加信息
+context: 上下文消息列表，包含之前的对话历史
+通过这种方式，AutoGen框架实现了一种灵活的智能体间任务委托机制，使复杂的多智能体系统能够更有效地协作。

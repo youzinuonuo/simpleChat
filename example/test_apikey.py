@@ -1,17 +1,29 @@
+import os
+os.environ['NO_PROXY'] = 'localhost,127.0.0.1'
+os.environ['no_proxy'] = os.environ['NO_PROXY']  # 同时设置小写版本
+# 如果有公司代理，需要设置
+os.environ['HTTPS_PROXY'] = ''  # 填写公司的代理地址
+os.environ['HTTP_PROXY'] = '' 
 import asyncio
-from autogen_ext.models.openai import OpenAIChatCompletionClient
+from autogen_ext.models.openai import OpenAIChatCompletionClient, AzureOpenAIChatCompletionClient
 from autogen_agentchat.agents import AssistantAgent
 from autogen_agentchat.messages import TextMessage, HandoffMessage
-from autogen_agentchat.utils import CancellationToken
+from autogen_core import CancellationToken
 
 # Configure model client with API key directly
-model_client = OpenAIChatCompletionClient(
-    model="gpt-4o",
-    api_key="<api_key>"  
+# 创建AutoGen的Azure OpenAI模型客户端
+model_client = AzureOpenAIChatCompletionClient(
+    azure_endpoint='https://r2d2-c3p0-genaihub.apps.nsroot.net/azure',
+    api_key='',
+    api_version='2024-02-15-preview',
+    model='gpt-4', 
+    azure_deployment='gpt-4-deployment'
 )
 
+os.environ['SSL_CERT_FILE'] = 'C\\path\\to\\cert\\InternalCAChain.pem'
+
 # Create planning agent
-planning_agent = AssistantAgent(
+planning_agent = AssistantAgent(  
     name="PlanningAgent",
     model_client=model_client,
     system_message="""You are an intelligent router. You need to analyze user queries and decide which specialized agent to route them to:
