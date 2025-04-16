@@ -6,3 +6,4 @@ pyautogen==0.2.8
 pydantic==2.10.6
 pydantic_settings==2.8.1
 uvicorn==0.34.0
+aiohttp

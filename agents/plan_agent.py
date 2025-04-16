@@ -3,7 +3,7 @@ from autogen_agentchat.agents import AssistantAgent
 from autogen_agentchat.messages import TextMessage, HandoffMessage
 from utils.api_key_utils import get_api_key
 import json
-
+from autogen_core import CancellationToken
 class PlanAgent:
     def __init__(self):
         # Initialize model client
@@ -41,9 +41,10 @@ class PlanAgent:
     async def analyze_query(self, query: str) -> dict:
         """Analyze the query and route to appropriate agent"""
         # Send user query to planning agent
+        cancellation_token = CancellationToken()
         response = await self.agent.on_messages([
             TextMessage(source="user", content=query)
-        ])
+        ], cancellation_token=cancellation_token)
         
         # Check if response is a HandoffMessage
         if isinstance(response.chat_message, HandoffMessage):
